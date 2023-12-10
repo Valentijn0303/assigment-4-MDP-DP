@@ -16,7 +16,7 @@ class Dynamic_Programming:
         self.V_s = None # will store a potential value solution table
         self.Q_sa = None # will store a potential action-value solution table
         
-    def value_iteration(self,env,gamma = 1.0, theta=0.001):
+    def value_iteration(self, env, gamma=1.0, theta=0.0001):
         ''' Executes value iteration on env. 
         gamma is the discount factor of the MDP
         theta is the acceptance threshold for convergence '''
@@ -24,10 +24,21 @@ class Dynamic_Programming:
         print("Starting Value Iteration (VI)")
         # initialize value table
         V_s = np.zeros(env.n_states)
-    
-        ## IMPLEMENT YOUR VALUE ITERATION ALGORITHM HERE
-        print("You still need to implement value iteration!")
-    
+
+        while True:
+            delta = 0
+            for s in range(env.n_states):
+                v = V_s[s]
+                action_values = np.zeros(env.n_actions)
+                for a in range(env.n_actions):
+                    s_prime, reward = env.transition_function(s, env.actions[a])
+                    action_values[a] = reward + gamma * V_s[s_prime]
+                V_s[s] = np.max(action_values)
+                delta = max(delta, np.abs(v - V_s[s]))
+            print(f'Error: {delta}')
+            if delta < theta:
+                break
+
         self.V_s = V_s
         return
 
@@ -56,9 +67,11 @@ class Dynamic_Programming:
             available_actions = env.actions
             # Compute action values
             if table == 'V' and self.V_s is not None:
-                ## IMPLEMENT ACTION VALUE ESTIMATION FROM self.V_s HERE !!!
-                print("You still need to implement greedy action selection from the value table self.V_s!")
-                greedy_action = None # replace this!
+                action_values = np.zeros(env.n_actions)
+                for a in range(env.n_actions):
+                    s_prime, reward = env.transition_function(current_state, env.actions[a])
+                    action_values[a] = reward + self.V_s[s_prime] 
+                    greedy_action = env.actions[np.argmax(action_values)]
 
                 
             
