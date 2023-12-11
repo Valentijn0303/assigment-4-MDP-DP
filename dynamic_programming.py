@@ -16,7 +16,7 @@ class Dynamic_Programming:
         self.V_s = None # will store a potential value solution table
         self.Q_sa = None # will store a potential action-value solution table
         
-    def value_iteration(self, env, gamma=1.0, theta=0.0001):
+    def value_iteration(self, env, gamma=1.0, theta=0.001):
         ''' Executes value iteration on env. 
         gamma is the discount factor of the MDP
         theta is the acceptance threshold for convergence '''
@@ -78,9 +78,9 @@ class Dynamic_Programming:
             if table == 'V' and self.V_s is not None:
                 action_values = np.zeros(env.n_actions)
                 for a in range(env.n_actions):
-                    s_prime, reward = env.transition_function(current_state, env.actions[a])
+                    s_prime, reward = env.transition_function(current_state, available_actions[a])
                     action_values[a] = reward + self.V_s[s_prime] 
-                greedy_action = env.actions[np.argmax(action_values)]
+                greedy_action = available_actions[np.argmax(action_values)]
 
                 
             
