@@ -25,21 +25,21 @@ class Dynamic_Programming:
         # initialize value table
         V_s = np.zeros(env.n_states)
 
-        while True:
-            delta = 0
-            for s in range(env.n_states):
-                v = V_s[s]
-                action_values = np.zeros(env.n_actions)
-                for a in range(env.n_actions):
-                    s_prime, reward = env.transition_function(s, env.actions[a])
-                    action_values[a] = reward + gamma * V_s[s_prime]
-                V_s[s] = np.max(action_values)
-                delta = max(delta, np.abs(v - V_s[s]))
-            print(f'Error: {delta}')
-            if delta < theta:
-                break
+        while True: # repeat until convergence
+            delta = 0 # will store the maximum change in value function
+            for s in range(env.n_states): # loop over all states
+                v = V_s[s] # store the old value of the state#
+                action_values = np.zeros(env.n_actions) # will store the action values for all actions in state s
+                for a in range(env.n_actions): # loop over all actions
+                    s_prime, reward = env.transition_function(s, env.actions[a]) # get the next state and reward
+                    action_values[a] = reward + gamma * V_s[s_prime] # compute the action value
+                V_s[s] = np.max(action_values)  # update the value of the state
+                delta = max(delta, np.abs(v - V_s[s])) # update the maximum change in value function
+            print(f'Error: {delta}') # print the maximum change in value function
+            if delta < theta: # check for convergence
+                break # if converged, break the loop
 
-        self.V_s = V_s
+        self.V_s = V_s # store the value table
         return
 
     def Q_value_iteration(self,env,gamma = 1.0, theta=0.001):
@@ -51,17 +51,17 @@ class Dynamic_Programming:
         # initialize state-action value table
         Q_sa = np.zeros([env.n_states,env.n_actions])
 
-        while True:
-            delta = 0
-            for s in range(env.n_states):
-                for a in range(env.n_actions):
-                    q = Q_sa[s, a]
-                    s_prime, reward = env.transition_function(s, env.actions[a])
-                    Q_sa[s, a] = reward + gamma * np.max(Q_sa[s_prime])
-                    delta = max(delta, np.abs(q - Q_sa[s, a]))
-            print(f'Error: {delta}')
-            if delta < theta:
-                break
+        while True: # repeat until convergence
+            delta = 0 # will store the maximum change in value function
+            for s in range(env.n_states): # loop over all states
+                for a in range(env.n_actions): # loop over all actions
+                    q = Q_sa[s, a] # store the old value of the state-action pair
+                    s_prime, reward = env.transition_function(s, env.actions[a]) # get the next state and reward
+                    Q_sa[s, a] = reward + gamma * np.max(Q_sa[s_prime]) # compute the action value
+                    delta = max(delta, np.abs(q - Q_sa[s, a])) # update the maximum change in value function
+            print(f'Error: {delta}') # print the maximum change in value function
+            if delta < theta: # check for convergence
+                break # if converged, break the loop
 
         self.Q_sa = Q_sa
         return
@@ -75,24 +75,20 @@ class Dynamic_Programming:
             current_state = env.get_current_state() # this is the current state of the environment, from which you will act
             available_actions = env.actions
             # Compute action values
-            if table == 'V' and self.V_s is not None:
-                action_values = np.zeros(env.n_actions)
-                for a in range(env.n_actions):
-                    s_prime, reward = env.transition_function(current_state, available_actions[a])
-                    action_values[a] = reward + self.V_s[s_prime] 
-                greedy_action = available_actions[np.argmax(action_values)]
+            if table == 'V' and self.V_s is not None: # if a value table is available, use it to compute the action values
+                action_values = np.zeros(env.n_actions) # will store the action values for all actions in state s
+                for a in range(env.n_actions): # loop over all actions
+                    s_prime, reward = env.transition_function(current_state, available_actions[a]) # get the next state and reward
+                    action_values[a] = reward + self.V_s[s_prime] # compute the action value
+                greedy_action = available_actions[np.argmax(action_values)] # get the greedy action
 
-                
-            
-            elif table == 'Q' and self.Q_sa is not None:
+            elif table == 'Q' and self.Q_sa is not None: 
                 action_values = self.Q_sa[current_state]
                 greedy_action = env.actions[np.argmax(action_values)]
-                
                 
             else:
                 print("No optimal value table was detected. Only manual execution possible.")
                 greedy_action = None
-
 
             # ask the user what he/she wants
             while True:
